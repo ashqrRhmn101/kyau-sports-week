@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ClipLoader } from "react-spinners";
+import { ImagePlus, UserCircle2 } from "lucide-react";
+import Swal from "sweetalert2";
+import imageCompression from "browser-image-compression";
 
 export default function NewPlayerPage() {
   const supabase = createClient();
@@ -13,13 +17,16 @@ export default function NewPlayerPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     department: "",
     position: "MID",
     jersey_no: "",
     bio: "",
-    photo_url: "",
   });
 
   useEffect(() => {
@@ -29,11 +36,51 @@ export default function NewPlayerPage() {
     });
   }, [supabase]);
 
+  // ছবি বাছাই করলেই সেটা ছোট রেজুলেশনে কমপ্রেস করে প্রিভিউ দেখানো হয় —
+  // এতে ডেটাবেজ/স্টোরেজে বড় সাইজের ছবি জমে জায়গা বা লোডিং স্পিড নষ্ট হবে না
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCompressing(true);
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 480,
+        useWebWorker: true,
+        fileType: "image/webp",
+      });
+      setPhotoFile(compressed);
+      setPhotoPreview(URL.createObjectURL(compressed));
+    } catch {
+      setError("ছবি প্রসেস করতে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    } finally {
+      setCompressing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return;
     setSubmitting(true);
     setError(null);
+
+    let photo_url: string | null = null;
+
+    if (photoFile) {
+      const path = `${userId}/${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(path, photoFile, {
+        contentType: "image/webp",
+        upsert: true,
+      });
+      if (uploadError) {
+        setSubmitting(false);
+        setError("ছবি আপলোড করতে সমস্যা হয়েছে: " + uploadError.message);
+        return;
+      }
+      const { data: publicUrl } = supabase.storage.from("avatars").getPublicUrl(path);
+      photo_url = publicUrl.publicUrl;
+    }
 
     const { error: insertError } = await supabase.from("players").insert({
       profile_id: userId,
@@ -42,7 +89,7 @@ export default function NewPlayerPage() {
       position: form.position,
       jersey_no: form.jersey_no ? Number(form.jersey_no) : null,
       bio: form.bio || null,
-      photo_url: form.photo_url || null,
+      photo_url,
       status: "pending",
       submitted_by: userId,
     });
@@ -52,10 +99,26 @@ export default function NewPlayerPage() {
       setError(insertError.message);
       return;
     }
-    router.push("/players?submitted=1");
+
+    await Swal.fire({
+      icon: "success",
+      title: "সাবমিট সম্পন্ন হয়েছে!",
+      text: "আপনার প্রোফাইলটি রিভিউর জন্য পাঠানো হয়েছে। অ্যাডমিন অ্যাপ্রুভ করলেই এটি সবার জন্য দৃশ্যমান হবে।",
+      confirmButtonText: "ঠিক আছে",
+      confirmButtonColor: "#FFC94A",
+      background: "#0B1F17",
+      color: "#F5F3EA",
+    });
+    router.push("/players");
   };
 
-  if (checking) return <p className="pt-16 text-chalk-300">লোড হচ্ছে…</p>;
+  if (checking) {
+    return (
+      <div className="flex justify-center py-24">
+        <ClipLoader color="#FFC94A" size={36} />
+      </div>
+    );
+  }
 
   if (!userId) {
     return (
@@ -80,7 +143,26 @@ export default function NewPlayerPage() {
         দেখা যাবে।
       </p>
 
-      <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="card p-6 space-y-5">
+        {/* ছবি আপলোড */}
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-full bg-pitch-800 border border-cardline overflow-hidden flex items-center justify-center shrink-0">
+            {compressing ? (
+              <ClipLoader color="#FFC94A" size={22} />
+            ) : photoPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photoPreview} alt="প্রিভিউ" className="w-full h-full object-cover" />
+            ) : (
+              <UserCircle2 className="text-chalk-300" size={36} />
+            )}
+          </div>
+          <label className="btn-secondary cursor-pointer text-sm flex items-center gap-2">
+            <ImagePlus size={16} />
+            {photoPreview ? "ছবি বদলান" : "ছবি আপলোড করুন"}
+            <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+          </label>
+        </div>
+
         <div>
           <label className="text-sm text-chalk-300 block mb-1">নাম *</label>
           <input
@@ -124,15 +206,6 @@ export default function NewPlayerPage() {
           </select>
         </div>
         <div>
-          <label className="text-sm text-chalk-300 block mb-1">ছবির URL (ঐচ্ছিক)</label>
-          <input
-            value={form.photo_url}
-            onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
-            placeholder="https://..."
-            className="w-full bg-pitch-800 border border-cardline rounded-lg px-3 py-2 text-chalk-100"
-          />
-        </div>
-        <div>
           <label className="text-sm text-chalk-300 block mb-1">সংক্ষিপ্ত পরিচিতি</label>
           <textarea
             value={form.bio}
@@ -144,7 +217,8 @@ export default function NewPlayerPage() {
 
         {error && <p className="text-crimson text-sm">{error}</p>}
 
-        <button type="submit" disabled={submitting} className="btn-primary w-full">
+        <button type="submit" disabled={submitting || compressing} className="btn-primary w-full flex items-center justify-center gap-2">
+          {submitting ? <ClipLoader color="#0B1F17" size={16} /> : null}
           {submitting ? "সাবমিট হচ্ছে…" : "রিভিউর জন্য সাবমিট করুন"}
         </button>
       </form>

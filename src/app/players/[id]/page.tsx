@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 
-export const revalidate = 0;
+export const revalidate = 20;
 
 const positionLabel: Record<string, string> = {
   GK: "গোলকিপার",

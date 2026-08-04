@@ -3,7 +3,7 @@ import PlayerCard from "@/components/PlayerCard";
 import Link from "next/link";
 import type { Player } from "@/lib/types";
 
-export const revalidate = 0;
+export const revalidate = 20;
 
 export default async function PlayersPage({
   searchParams,
