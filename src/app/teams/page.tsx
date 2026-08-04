@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-export const revalidate = 0;
+export const revalidate = 20;
 
 export default async function TeamsPage() {
   const supabase = createClient();

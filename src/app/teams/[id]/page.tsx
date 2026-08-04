@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import PlayerCard from "@/components/PlayerCard";
 
-export const revalidate = 0;
+export const revalidate = 20;
 
 export default async function TeamDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
