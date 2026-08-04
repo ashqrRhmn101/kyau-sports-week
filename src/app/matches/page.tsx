@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import MatchCard from "@/components/MatchCard";
 
-export const revalidate = 0;
+export const revalidate = 20;
 
 export default async function MatchesPage() {
   const supabase = createClient();
