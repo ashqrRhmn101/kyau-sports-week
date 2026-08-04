@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ClipLoader } from "react-spinners";
+import { Mail, Lock, User, Building2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function LoginPage() {
   const supabase = createClient();
@@ -11,14 +14,12 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setMessage(null);
 
     if (mode === "signin") {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -33,7 +34,17 @@ export default function LoginPage() {
       });
       setLoading(false);
       if (signUpError) return setError(signUpError.message);
-      setMessage("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল কনফার্ম করার পর লগইন করুন।");
+
+      await Swal.fire({
+        icon: "success",
+        title: "প্রায় হয়ে গেছে! 📩",
+        html: `আপনার <b>${email}</b> ইনবক্স চেক করুন এবং ভেরিফিকেশন লিংকে ক্লিক করে অ্যাকাউন্ট সম্পূর্ণ করুন।`,
+        confirmButtonText: "বুঝেছি",
+        confirmButtonColor: "#FFC94A",
+        background: "#0B1F17",
+        color: "#F5F3EA",
+      });
+      setMode("signin");
     }
   };
 
@@ -63,7 +74,9 @@ export default function LoginPage() {
         {mode === "signup" && (
           <>
             <div>
-              <label className="text-sm text-chalk-300 block mb-1">নাম</label>
+              <label className="text-sm text-chalk-300 block mb-1 flex items-center gap-1.5">
+                <User size={14} /> নাম
+              </label>
               <input
                 required
                 value={name}
@@ -72,7 +85,9 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="text-sm text-chalk-300 block mb-1">ডিপার্টমেন্ট</label>
+              <label className="text-sm text-chalk-300 block mb-1 flex items-center gap-1.5">
+                <Building2 size={14} /> ডিপার্টমেন্ট
+              </label>
               <input
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
@@ -82,7 +97,9 @@ export default function LoginPage() {
           </>
         )}
         <div>
-          <label className="text-sm text-chalk-300 block mb-1">ইমেইল</label>
+          <label className="text-sm text-chalk-300 block mb-1 flex items-center gap-1.5">
+            <Mail size={14} /> ইমেইল
+          </label>
           <input
             type="email"
             required
@@ -92,7 +109,9 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="text-sm text-chalk-300 block mb-1">পাসওয়ার্ড</label>
+          <label className="text-sm text-chalk-300 block mb-1 flex items-center gap-1.5">
+            <Lock size={14} /> পাসওয়ার্ড
+          </label>
           <input
             type="password"
             required
@@ -104,9 +123,9 @@ export default function LoginPage() {
         </div>
 
         {error && <p className="text-crimson text-sm">{error}</p>}
-        {message && <p className="text-floodlight-500 text-sm">{message}</p>}
 
-        <button type="submit" disabled={loading} className="btn-primary w-full">
+        <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
+          {loading ? <ClipLoader color="#0B1F17" size={16} /> : null}
           {loading ? "অপেক্ষা করুন…" : mode === "signin" ? "লগইন করুন" : "সাইন আপ করুন"}
         </button>
       </form>
