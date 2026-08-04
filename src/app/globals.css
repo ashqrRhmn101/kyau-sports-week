@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-pitch-900 text-chalk-200 font-body;
+  background-image: theme(backgroundImage.floodlight-glow), theme(backgroundImage.pitch-lines);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: theme(colors.floodlight.500);
+  color: theme(colors.pitch.900);
+}
+
+/* কীবোর্ড ফোকাস সবসময় দৃশ্যমান রাখা */
+:focus-visible {
+  outline: 2px solid theme(colors.floodlight.500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.card {
+  @apply bg-card border border-cardline rounded-xl backdrop-blur-sm;
+}
+
+.scoreboard-digit {
+  @apply font-mono tabular-nums;
+}
+
+.eyebrow {
+  @apply text-xs uppercase tracking-widest2 text-floodlight-500 font-semibold;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-lg bg-floodlight-500 text-pitch-900 font-semibold px-4 py-2 hover:bg-floodlight-400 transition-colors;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-lg border border-cardline text-chalk-200 font-medium px-4 py-2 hover:bg-card transition-colors;
+}
+
+.status-pill {
+  @apply text-[11px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full;
+}
