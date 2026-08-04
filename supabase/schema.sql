@@ -240,6 +240,34 @@ create policy "pending_edits admin update" on pending_edits
   for update using (is_admin());
 
 -- ============================================================
+-- Storage — প্লেয়ার প্রোফাইল ছবি আপলোডের জন্য 'avatars' বাকেট
+-- (এই অংশটা আলাদাভাবে রান করার দরকার নেই যদি উপরের পুরো ফাইলটা
+-- একসাথে রান করে থাকেন, কিন্তু আগে থেকে schema রান করা থাকলে
+-- শুধু এই অংশটুকু আলাদাভাবে SQL Editor-এ রান করলেই হবে)
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+-- যেকেউ (এমনকি লগইন ছাড়া) অ্যাভাটার দেখতে পারবে, কারণ বাকেট পাবলিক
+create policy "avatars public read"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+-- শুধু লগইন করা ইউজার নিজের ফোল্ডারে (user-id দিয়ে নামকরণ করা ফাইল) আপলোড করতে পারবে
+create policy "avatars authenticated upload"
+  on storage.objects for insert
+  with check (bucket_id = 'avatars' and auth.role() = 'authenticated');
+
+create policy "avatars owner update"
+  on storage.objects for update
+  using (bucket_id = 'avatars' and owner = auth.uid());
+
+create policy "avatars owner delete"
+  on storage.objects for delete
+  using (bucket_id = 'avatars' and owner = auth.uid());
+
+-- ============================================================
 -- প্রথম অ্যাডমিন বানানোর জন্য (সাইনআপ করার পর এই কমান্ড রান করুন,
 -- your-email@example.com জায়গায় নিজের ইমেইল বসিয়ে):
 --
