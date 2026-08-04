@@ -11,15 +11,21 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
+    "browser-image-compression": "^2.0.2",
+    "lucide-react": "^1.28.0",
     "next": "14.2.35",
+    "nextjs-toploader": "^3.9.17",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-spinners": "^0.17.0",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
+    "daisyui": "^4.12.24",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.5.2"

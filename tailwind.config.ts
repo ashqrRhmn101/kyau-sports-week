@@ -41,7 +41,27 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: [
+      {
+        sportsweek: {
+          primary: "#FFC94A",
+          secondary: "#1F6E43",
+          accent: "#E24C4B",
+          neutral: "#12301F",
+          "base-100": "#0B1F17",
+          "base-200": "#12301F",
+          "base-300": "#1B4229",
+          info: "#7DD3FC",
+          success: "#2E8B57",
+          warning: "#FFC94A",
+          error: "#E24C4B",
+        },
+      },
+    ],
+    darkTheme: "sportsweek",
+  },
 };
 
 export default config;
