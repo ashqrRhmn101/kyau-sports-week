@@ -22,9 +22,9 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="pt-14 pb-10 sm:pt-20 sm:pb-14">
-        <p className="eyebrow mb-3">সিজন ২০২৬ · স্প্রিং</p>
-        <h1 className="font-display text-5xl sm:text-7xl leading-[0.95] text-chalk-100 max-w-3xl">
+      <section className="pt-5 pb-10 sm:pt-7 sm:pb-14">
+        <p className="eyebrow mb-5">সিজন ২০২৬ · স্প্রিং</p>
+        <h1 className="font-display text-4xl sm:text-6xl leading-[0.95] text-chalk-100 max-w-3xl">
           প্রতিটা ট্যাকল, প্রতিটা গোল —
           <span className="text-floodlight-500"> এক জায়গায়।</span>
         </h1>
