@@ -40,10 +40,12 @@ export interface Coach {
 
 export interface Team {
   id: string;
+  name: string | null;
   department: string;
   season_id: string;
   coach_id: string | null;
   formation: string | null;
+  is_champion: boolean;
 }
 
 export type MatchStatus = "scheduled" | "live" | "completed";
