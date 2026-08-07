@@ -38,6 +38,7 @@ function PlayerIcon({ player }: { player: LineupPlayer }) {
       <span className="text-[10px] leading-tight text-chalk-100 text-center truncate w-full">
         {player.name.split(" ")[0]}
       </span>
+      <span className="scoreboard-digit text-[9px] leading-none text-floodlight-500/90">{player.position}</span>
     </div>
   );
 }
@@ -66,7 +67,7 @@ export default function Lineup({
         {formation && <p className="text-[10px] text-chalk-300 scoreboard-digit">{formation}</p>}
       </div>
       <div
-        className="p-3 sm:p-5 flex flex-col justify-between gap-4 sm:gap-6 min-h-[280px]"
+        className="p-3 sm:p-5 flex flex-col justify-between gap-4 sm:gap-6 min-h-[300px]"
         style={{
           background:
             "repeating-linear-gradient(0deg, #1F6E43, #1F6E43 40px, #22753f 40px, #22753f 80px)",
