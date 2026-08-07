@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ClipLoader } from "react-spinners";
 import { Swords, Plus, Trash2, ChevronRight } from "lucide-react";
 import Swal from "sweetalert2";
+import { teamLabel } from "@/lib/teamLabel";
 
 const statusLabel: Record<string, string> = { scheduled: "নির্ধারিত", live: "লাইভ", completed: "সম্পন্ন" };
 const statusStyle: Record<string, string> = {
@@ -23,7 +24,7 @@ export default function MatchesAdminPage() {
     setLoading(true);
     const { data } = await supabase
       .from("matches")
-      .select("id, date, score_a, score_b, status, team_a:team_a_id(department), team_b:team_b_id(department)")
+      .select("id, date, score_a, score_b, status, team_a:team_a_id(name, department), team_b:team_b_id(name, department)")
       .order("date", { ascending: false });
     setMatches(data ?? []);
     setLoading(false);
@@ -80,7 +81,7 @@ export default function MatchesAdminPage() {
               <div className="flex items-center gap-3 min-w-0">
                 <span className={`status-pill shrink-0 ${statusStyle[m.status]}`}>{statusLabel[m.status]}</span>
                 <span className="text-sm text-chalk-100 truncate">
-                  {m.team_a?.department} <span className="scoreboard-digit text-floodlight-500">{m.score_a}-{m.score_b}</span> {m.team_b?.department}
+                  {teamLabel(m.team_a)} <span className="scoreboard-digit text-floodlight-500">{m.score_a}-{m.score_b}</span> {teamLabel(m.team_b)}
                 </span>
                 <span className="text-xs text-chalk-300 hidden sm:inline shrink-0">
                   {new Date(m.date).toLocaleDateString("bn-BD", { day: "numeric", month: "short" })}

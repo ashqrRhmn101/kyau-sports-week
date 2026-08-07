@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ClipLoader } from "react-spinners";
 import { Swords } from "lucide-react";
 import Swal from "sweetalert2";
+import { teamLabel } from "@/lib/teamLabel";
 
 export default function NewMatchPage() {
   const supabase = createClient();
@@ -25,7 +26,7 @@ export default function NewMatchPage() {
 
   useEffect(() => {
     supabase.from("seasons").select("id, name").order("year", { ascending: false }).then(({ data }) => setSeasons(data ?? []));
-    supabase.from("teams").select("id, department").order("department").then(({ data }) => setTeams(data ?? []));
+    supabase.from("teams").select("id, name, department").order("department").then(({ data }) => setTeams(data ?? []));
   }, []);
 
   const createMatch = async (e: React.FormEvent) => {
@@ -92,7 +93,7 @@ export default function NewMatchPage() {
               <option value="">নির্বাচন করুন</option>
               {teams.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.department}
+                  {teamLabel(t)}
                 </option>
               ))}
             </select>
@@ -108,7 +109,7 @@ export default function NewMatchPage() {
               <option value="">নির্বাচন করুন</option>
               {teams.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.department}
+                  {teamLabel(t)}
                 </option>
               ))}
             </select>

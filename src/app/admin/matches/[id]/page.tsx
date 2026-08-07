@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ClipLoader } from "react-spinners";
 import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
 import Swal from "sweetalert2";
+import { teamLabel } from "@/lib/teamLabel";
 
 const eventLabel: Record<string, string> = {
   goal: "⚽ গোল",
@@ -33,7 +34,7 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
     setLoading(true);
     const { data: m } = await supabase
       .from("matches")
-      .select("*, team_a:team_a_id(id, department), team_b:team_b_id(id, department)")
+      .select("*, team_a:team_a_id(id, name, department), team_b:team_b_id(id, name, department)")
       .eq("id", params.id)
       .single();
     setMatch(m);
@@ -170,7 +171,7 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
         <ArrowLeft size={14} /> সব ম্যাচ
       </Link>
       <h1 className="font-display text-4xl text-chalk-100 mb-8">
-        {match.team_a?.department} <span className="scoreboard-digit text-floodlight-500">{match.score_a}–{match.score_b}</span> {match.team_b?.department}
+        {teamLabel(match.team_a)} <span className="scoreboard-digit text-floodlight-500">{match.score_a}–{match.score_b}</span> {teamLabel(match.team_b)}
       </h1>
 
       {/* ম্যাচের তথ্য */}
@@ -195,7 +196,7 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
             </select>
           </div>
           <div>
-            <label className="text-xs text-chalk-300 block mb-1">স্কোর A ({match.team_a?.department})</label>
+            <label className="text-xs text-chalk-300 block mb-1">স্কোর A ({teamLabel(match.team_a)})</label>
             <input
               type="number"
               value={match.score_a}
@@ -204,7 +205,7 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
             />
           </div>
           <div>
-            <label className="text-xs text-chalk-300 block mb-1">স্কোর B ({match.team_b?.department})</label>
+            <label className="text-xs text-chalk-300 block mb-1">স্কোর B ({teamLabel(match.team_b)})</label>
             <input
               type="number"
               value={match.score_b}
