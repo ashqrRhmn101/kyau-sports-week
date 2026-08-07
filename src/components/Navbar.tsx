@@ -13,6 +13,7 @@ const links = [
   { href: "/teams", label: "টিম" },
   { href: "/matches", label: "ম্যাচ" },
   { href: "/leaderboard", label: "লিডারবোর্ড" },
+  { href: "/champions", label: "চ্যাম্পিয়ন" },
 ];
 
 function initials(name: string) {
