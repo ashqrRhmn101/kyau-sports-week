@@ -7,6 +7,8 @@ import { UserPlus, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 
+import { teamLabel } from "@/lib/teamLabel";
+
 export default function TeamManagePage({ params }: { params: { id: string } }) {
   const supabase = createClient();
   const [team, setTeam] = useState<any>(null);
@@ -45,6 +47,7 @@ export default function TeamManagePage({ params }: { params: { id: string } }) {
     const { error } = await supabase
       .from("teams")
       .update({
+        name: team.name || null,
         department: team.department,
         season_id: team.season_id,
         coach_id: team.coach_id || null,
@@ -95,11 +98,20 @@ export default function TeamManagePage({ params }: { params: { id: string } }) {
       <Link href="/admin/teams" className="inline-flex items-center gap-1.5 text-sm text-chalk-300 hover:text-floodlight-500 mb-4">
         <ArrowLeft size={14} /> সব টিম
       </Link>
-      <h1 className="font-display text-4xl text-chalk-100 mb-8">{team.department} — টিম ম্যানেজ</h1>
+      <h1 className="font-display text-4xl text-chalk-100 mb-8">{teamLabel(team)} — টিম ম্যানেজ</h1>
 
       <form onSubmit={handleSave} className="card p-5 space-y-4 mb-8">
         <h2 className="font-display text-xl text-chalk-100">টিমের তথ্য</h2>
         <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-chalk-300 block mb-1">টিমের নাম</label>
+            <input
+              value={team.name ?? ""}
+              onChange={(e) => setTeam({ ...team, name: e.target.value })}
+              placeholder="যেমন: Thunder"
+              className={inputClass}
+            />
+          </div>
           <div>
             <label className="text-xs text-chalk-300 block mb-1">ডিপার্টমেন্ট</label>
             <input
