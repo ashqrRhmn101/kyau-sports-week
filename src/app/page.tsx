@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import MatchCard from "@/components/MatchCard";
 import Link from "next/link";
+import { UserCircle2 } from "lucide-react";
+import { teamLabel } from "@/lib/teamLabel";
 
 export const revalidate = 20;
 
@@ -9,22 +11,22 @@ export default async function HomePage() {
 
   const { data: matches } = await supabase
     .from("matches")
-    .select("id, date, score_a, score_b, status, team_a:team_a_id(department), team_b:team_b_id(department)")
+    .select("id, date, score_a, score_b, status, team_a:team_a_id(name, department), team_b:team_b_id(name, department)")
     .order("date", { ascending: false })
     .limit(6);
 
   const { data: topScorers } = await supabase
     .from("player_season_stats")
-    .select("player_id, name, department, goals")
+    .select("player_id, name, department, goals, photo_url")
     .order("goals", { ascending: false })
     .limit(5);
 
   return (
     <div>
       {/* Hero */}
-      <section className="pt-5 pb-10 sm:pt-7 sm:pb-14">
-        <p className="eyebrow mb-5">সিজন ২০২৬ · স্প্রিং</p>
-        <h1 className="font-display text-4xl sm:text-6xl leading-[0.95] text-chalk-100 max-w-3xl">
+      <section className="pt-14 pb-10 sm:pt-20 sm:pb-14">
+        <p className="eyebrow mb-3">সিজন ২০২৬ · স্প্রিং</p>
+        <h1 className="font-display text-5xl sm:text-7xl leading-[0.95] text-chalk-100 max-w-3xl">
           প্রতিটা ট্যাকল, প্রতিটা গোল —
           <span className="text-floodlight-500"> এক জায়গায়।</span>
         </h1>
@@ -56,8 +58,8 @@ export default async function HomePage() {
                 <MatchCard
                   key={m.id}
                   id={m.id}
-                  teamAName={m.team_a?.department ?? "TBD"}
-                  teamBName={m.team_b?.department ?? "TBD"}
+                  teamAName={teamLabel(m.team_a)}
+                  teamBName={teamLabel(m.team_b)}
                   scoreA={m.score_a}
                   scoreB={m.score_b}
                   status={m.status}
@@ -88,7 +90,15 @@ export default async function HomePage() {
                     className="flex items-center justify-between px-3 py-2.5 border-b border-cardline last:border-none"
                   >
                     <span className="flex items-center gap-3 min-w-0">
-                      <span className="scoreboard-digit text-floodlight-500 w-5 text-sm">{i + 1}</span>
+                      <span className="scoreboard-digit text-floodlight-500 w-5 text-sm shrink-0">{i + 1}</span>
+                      <span className="w-8 h-8 rounded-full bg-pitch-800 border border-cardline overflow-hidden flex items-center justify-center shrink-0">
+                        {p.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.photo_url} alt={p.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <UserCircle2 className="text-chalk-300" size={18} />
+                        )}
+                      </span>
                       <span className="truncate">
                         <Link href={`/players/${p.player_id}`} className="text-chalk-100 hover:text-floodlight-500">
                           {p.name}
@@ -96,7 +106,7 @@ export default async function HomePage() {
                         <span className="block text-xs text-chalk-300">{p.department}</span>
                       </span>
                     </span>
-                    <span className="scoreboard-digit font-bold text-chalk-100">{p.goals}</span>
+                    <span className="scoreboard-digit font-bold text-chalk-100 shrink-0">{p.goals}</span>
                   </li>
                 ))}
               </ol>
