@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Trophy } from "lucide-react";
+import { teamLabel } from "@/lib/teamLabel";
 
 export const revalidate = 20;
 
@@ -9,7 +10,7 @@ export default async function ChampionsPage() {
 
   const { data: champions } = await supabase
     .from("teams")
-    .select("id, department, formation, coach:coach_id(name), season:season_id(name, year)")
+    .select("id, name, department, formation, coach:coach_id(name), season:season_id(name, year)")
     .eq("is_champion", true)
     .order("season(year)", { ascending: false });
 
@@ -34,7 +35,8 @@ export default async function ChampionsPage() {
             >
               <Trophy className="text-floodlight-500 mx-auto mb-3" size={32} />
               <p className="eyebrow mb-1">{t.season?.name}</p>
-              <h2 className="font-display text-2xl text-chalk-100">{t.department}</h2>
+              <h2 className="font-display text-2xl text-chalk-100">{teamLabel(t)}</h2>
+              <p className="text-xs text-chalk-300">{t.department}</p>
               <p className="text-sm text-chalk-300 mt-2">কোচ: {t.coach?.name ?? "—"}</p>
             </Link>
           ))}
