@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Shield } from "lucide-react";
+import { teamLabel } from "@/lib/teamLabel";
 
 export const revalidate = 20;
 
@@ -9,7 +10,7 @@ export default async function TeamsPage() {
 
   const { data: teams } = await supabase
     .from("teams")
-    .select("id, department, formation, is_champion, coach:coach_id(name), season:season_id(name, year)")
+    .select("id, name, department, formation, is_champion, coach:coach_id(name), season:season_id(name, year)")
     .order("department");
 
   const grouped = new Map<string, any[]>();
@@ -54,7 +55,7 @@ export default async function TeamsPage() {
                           <span className="status-pill bg-floodlight-500/15 text-floodlight-500">🏆 চ্যাম্পিয়ন</span>
                         )}
                       </div>
-                      <h3 className="font-display text-xl text-chalk-100">{t.department}</h3>
+                      <h3 className="font-display text-xl text-chalk-100">{teamLabel(t)}</h3>
                       <p className="text-sm text-chalk-300 mt-2">কোচ: {t.coach?.name ?? "নির্ধারিত হয়নি"}</p>
                       {t.formation && <p className="scoreboard-digit text-xs text-floodlight-500 mt-1">{t.formation}</p>}
                     </Link>

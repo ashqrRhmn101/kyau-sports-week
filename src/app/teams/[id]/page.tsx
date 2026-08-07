@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import PlayerCard from "@/components/PlayerCard";
+import { teamLabel } from "@/lib/teamLabel";
 
 export const revalidate = 20;
 
@@ -9,7 +10,7 @@ export default async function TeamDetailPage({ params }: { params: { id: string 
 
   const { data: team } = await supabase
     .from("teams")
-    .select("id, department, formation, coach:coach_id(name, playing_style_notes), season:season_id(name)")
+    .select("id, name, department, formation, is_champion, coach:coach_id(name, playing_style_notes), season:season_id(name)")
     .eq("id", params.id)
     .single();
 
@@ -25,7 +26,13 @@ export default async function TeamDetailPage({ params }: { params: { id: string 
   return (
     <div className="pt-10">
       <p className="eyebrow mb-2">{(team as any).season?.name}</p>
-      <h1 className="font-display text-5xl text-chalk-100 mb-1">{team.department}</h1>
+      <div className="flex items-center gap-3 mb-1">
+        <h1 className="font-display text-5xl text-chalk-100">{teamLabel(team)}</h1>
+        {team.is_champion && (
+          <span className="status-pill bg-floodlight-500/15 text-floodlight-500 text-sm">🏆 চ্যাম্পিয়ন</span>
+        )}
+      </div>
+      <p className="text-chalk-300 text-sm mb-2">{team.department}</p>
       {team.formation && (
         <p className="scoreboard-digit text-floodlight-500 mb-6">ফরমেশন: {team.formation}</p>
       )}
