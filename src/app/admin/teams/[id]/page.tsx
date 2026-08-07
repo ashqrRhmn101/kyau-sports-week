@@ -49,6 +49,7 @@ export default function TeamManagePage({ params }: { params: { id: string } }) {
         season_id: team.season_id,
         coach_id: team.coach_id || null,
         formation: team.formation || null,
+        is_champion: team.is_champion ?? false,
       })
       .eq("id", params.id);
     setSaving(false);
@@ -143,6 +144,18 @@ export default function TeamManagePage({ params }: { params: { id: string } }) {
               onChange={(e) => setTeam({ ...team, formation: e.target.value })}
               className={inputClass}
             />
+          </div>
+          <div className="flex items-center gap-2 sm:col-span-2 pt-1">
+            <input
+              type="checkbox"
+              id="is_champion"
+              checked={!!team.is_champion}
+              onChange={(e) => setTeam({ ...team, is_champion: e.target.checked })}
+              className="w-4 h-4 accent-floodlight-500"
+            />
+            <label htmlFor="is_champion" className="text-sm text-chalk-100">
+              🏆 এই টিম এই সিজনের চ্যাম্পিয়ন
+            </label>
           </div>
         </div>
         <button type="submit" disabled={saving} className="btn-primary flex items-center justify-center gap-1.5">
