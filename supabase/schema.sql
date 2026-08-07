@@ -57,10 +57,12 @@ create table if not exists coaches (
 -- ---------- teams ----------
 create table if not exists teams (
   id uuid primary key default uuid_generate_v4(),
+  name text,
   department text not null,
   season_id uuid references seasons(id) on delete cascade,
   coach_id uuid references coaches(id),
   formation text,
+  is_champion boolean not null default false,
   created_at timestamptz default now()
 );
 
@@ -136,9 +138,6 @@ create table if not exists pending_edits (
   created_at timestamptz default now()
 );
 
--- ---------- teams: চ্যাম্পিয়ন ফ্ল্যাগ ----------
-alter table teams add column if not exists is_champion boolean not null default false;
-
 -- ---------- player_live_ratings (লাইভ ম্যাচ চলাকালীন দর্শকদের রেটিং) ----------
 create table if not exists player_live_ratings (
   id uuid primary key default uuid_generate_v4(),
@@ -158,20 +157,20 @@ select
   p.id as player_id,
   p.name,
   p.department,
-  p.photo_url,
   m.season_id,
   count(*) filter (where me.event_type = 'goal') as goals,
   count(*) filter (where me.event_type = 'assist') as assists,
   count(*) filter (where me.event_type = 'yellow_card') as yellow_cards,
   count(*) filter (where me.event_type = 'red_card') as red_cards,
   round(avg(pms.rating), 2) as avg_rating,
-  count(distinct m.id) as matches_played
+  count(distinct m.id) as matches_played,
+  p.photo_url
 from players p
 left join match_events me on me.player_id = p.id
 left join matches m on m.id = me.match_id
 left join player_match_stats pms on pms.player_id = p.id and pms.match_id = m.id
 where p.status = 'approved'
-group by p.id, p.name, p.department, p.photo_url, m.season_id;
+group by p.id, p.name, p.department, m.season_id, p.photo_url;
 
 -- ম্যাচ চলাকালীন প্রতিটা প্লেয়ারের গড় দর্শক-রেটিং বের করার ভিউ
 create or replace view player_live_rating_avg as
