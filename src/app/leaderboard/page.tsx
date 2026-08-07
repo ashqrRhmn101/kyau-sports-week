@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { UserCircle2 } from "lucide-react";
 
 export const revalidate = 20;
 
@@ -25,7 +26,15 @@ function Board({
               className="flex items-center justify-between px-4 py-2.5 border-t border-cardline"
             >
               <span className="flex items-center gap-3 min-w-0">
-                <span className="scoreboard-digit text-floodlight-500 w-5 text-sm">{i + 1}</span>
+                <span className="scoreboard-digit text-floodlight-500 w-5 text-sm shrink-0">{i + 1}</span>
+                <span className="w-8 h-8 rounded-full bg-pitch-800 border border-cardline overflow-hidden flex items-center justify-center shrink-0">
+                  {r.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={r.photo_url} alt={r.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <UserCircle2 className="text-chalk-300" size={18} />
+                  )}
+                </span>
                 <Link href={`/players/${r.player_id}`} className="truncate text-chalk-100 hover:text-floodlight-500">
                   {r.name}
                   <span className="block text-xs text-chalk-300">{r.department}</span>
