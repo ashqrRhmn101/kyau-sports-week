@@ -106,18 +106,18 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   return (
     <div className="pt-10">
       {/* স্কোরবোর্ড */}
-      <div className="card p-6 sm:p-8 text-center mb-8">
+      <div className="card p-2 sm:p-8 text-center mb-8">
         {isLive && (
           <span className="status-pill bg-crimson/20 text-crimson inline-flex items-center gap-1.5 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-crimson animate-pulse" /> লাইভ
           </span>
         )}
         <div className="flex items-center justify-center gap-6 sm:gap-10">
-          <span className="font-display text-2xl sm:text-3xl text-chalk-100">{teamLabel(match.team_a)}</span>
-          <span className="scoreboard-digit text-5xl sm:text-6xl font-bold text-floodlight-500">
+          <span className="font-display text-xl sm:text-3xl text-chalk-100">{teamLabel(match.team_a)}</span>
+          <span className="scoreboard-digit text-xl sm:text-5xl font-bold text-floodlight-500">
             {match.score_a} – {match.score_b}
           </span>
-          <span className="font-display text-2xl sm:text-3xl text-chalk-100">{teamLabel(match.team_b)}</span>
+          <span className="font-display text-xl sm:text-3xl text-chalk-100">{teamLabel(match.team_b)}</span>
         </div>
         <p className="text-chalk-300 text-sm mt-4">
           {new Date(match.date).toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" })}
