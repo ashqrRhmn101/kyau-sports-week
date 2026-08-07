@@ -27,6 +27,7 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
 
   const [eventForm, setEventForm] = useState({ player_id: "", event_type: "goal", minute: "" });
   const [statForm, setStatForm] = useState({ player_id: "", rating: "", goals: "", assists: "", fouls: "", minutes_played: "" });
+  const [crowdAvg, setCrowdAvg] = useState<Record<string, { avg_rating: number; rating_count: number }>>({});
 
   const load = async () => {
     setLoading(true);
@@ -49,6 +50,13 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
       .select("id, rating, goals, assists, fouls, minutes_played, player:player_id(id, name)")
       .eq("match_id", params.id);
     setStatRows(st ?? []);
+
+    const { data: cr } = await supabase.from("player_live_rating_avg").select("*").eq("match_id", params.id);
+    const crMap: Record<string, { avg_rating: number; rating_count: number }> = {};
+    (cr ?? []).forEach((r: any) => {
+      crMap[r.player_id] = { avg_rating: r.avg_rating, rating_count: r.rating_count };
+    });
+    setCrowdAvg(crMap);
 
     if (m) {
       const { data: sq } = await supabase
@@ -281,6 +289,22 @@ export default function MatchManagePage({ params }: { params: { id: string } }) 
       <div className="card p-5">
         <h2 className="font-display text-xl text-chalk-100 mb-1">প্লেয়ার রেটিং ও পারফরম্যান্স</h2>
         <p className="text-xs text-chalk-300 mb-4">একই প্লেয়ারের জন্য আবার সাবমিট করলে আগেরটা আপডেট হয়ে যাবে।</p>
+
+        {Object.keys(crowdAvg).length > 0 && (
+          <div className="mb-4 p-3 rounded-lg bg-floodlight-500/10 border border-floodlight-500/20">
+            <p className="text-xs text-floodlight-500 font-semibold mb-2">দর্শকদের গড় লাইভ রেটিং (রেফারেন্স হিসেবে দেখুন)</p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {squad
+                .filter((p) => crowdAvg[p.id])
+                .map((p) => (
+                  <span key={p.id} className="text-xs text-chalk-300 scoreboard-digit">
+                    {p.name}: <span className="text-chalk-100">{crowdAvg[p.id].avg_rating}</span> ({crowdAvg[p.id].rating_count} জন)
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
         <form onSubmit={saveStat} className="grid sm:grid-cols-6 gap-2 mb-4">
           <select
             value={statForm.player_id}
