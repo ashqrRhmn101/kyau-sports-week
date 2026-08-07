@@ -136,6 +136,20 @@ create table if not exists pending_edits (
   created_at timestamptz default now()
 );
 
+-- ---------- teams: চ্যাম্পিয়ন ফ্ল্যাগ ----------
+alter table teams add column if not exists is_champion boolean not null default false;
+
+-- ---------- player_live_ratings (লাইভ ম্যাচ চলাকালীন দর্শকদের রেটিং) ----------
+create table if not exists player_live_ratings (
+  id uuid primary key default uuid_generate_v4(),
+  match_id uuid references matches(id) on delete cascade,
+  player_id uuid references players(id) on delete cascade,
+  rated_by uuid references profiles(id) on delete cascade,
+  rating numeric(3,1) not null check (rating between 0 and 10),
+  created_at timestamptz default now(),
+  unique (match_id, player_id, rated_by)
+);
+
 -- ============================================================
 -- সহজ অ্যাগ্রিগেট ভিউ — টপ স্কোরার / কার্ড লিডারবোর্ড
 -- ============================================================
@@ -144,6 +158,7 @@ select
   p.id as player_id,
   p.name,
   p.department,
+  p.photo_url,
   m.season_id,
   count(*) filter (where me.event_type = 'goal') as goals,
   count(*) filter (where me.event_type = 'assist') as assists,
@@ -156,7 +171,17 @@ left join match_events me on me.player_id = p.id
 left join matches m on m.id = me.match_id
 left join player_match_stats pms on pms.player_id = p.id and pms.match_id = m.id
 where p.status = 'approved'
-group by p.id, p.name, p.department, m.season_id;
+group by p.id, p.name, p.department, p.photo_url, m.season_id;
+
+-- ম্যাচ চলাকালীন প্রতিটা প্লেয়ারের গড় দর্শক-রেটিং বের করার ভিউ
+create or replace view player_live_rating_avg as
+select
+  match_id,
+  player_id,
+  round(avg(rating), 2) as avg_rating,
+  count(*) as rating_count
+from player_live_ratings
+group by match_id, player_id;
 
 -- ============================================================
 -- Row Level Security (RLS)
@@ -171,6 +196,7 @@ alter table matches enable row level security;
 alter table match_events enable row level security;
 alter table player_match_stats enable row level security;
 alter table pending_edits enable row level security;
+alter table player_live_ratings enable row level security;
 
 -- হেল্পার: বর্তমান ইউজার অ্যাডমিন কিনা চেক করার ফাংশন
 create or replace function is_admin()
@@ -238,6 +264,25 @@ create policy "pending_edits insert self" on pending_edits
   for insert with check (auth.uid() = submitted_by);
 create policy "pending_edits admin update" on pending_edits
   for update using (is_admin());
+
+-- ---- player_live_ratings (শুধু ম্যাচ লাইভ থাকা অবস্থায় লগইন করা যেকেউ রেট করতে পারবে) ----
+create policy "live_ratings public read" on player_live_ratings
+  for select using (true);
+
+create policy "live_ratings insert while live" on player_live_ratings
+  for insert with check (
+    auth.uid() = rated_by
+    and exists (select 1 from matches m where m.id = match_id and m.status = 'live')
+  );
+
+create policy "live_ratings update own while live" on player_live_ratings
+  for update using (
+    auth.uid() = rated_by
+    and exists (select 1 from matches m where m.id = match_id and m.status = 'live')
+  );
+
+create policy "live_ratings admin delete" on player_live_ratings
+  for delete using (is_admin());
 
 -- ============================================================
 -- Storage — প্লেয়ার প্রোফাইল ছবি আপলোডের জন্য 'avatars' বাকেট
