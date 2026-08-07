@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Lineup from "@/components/Lineup";
 import LiveRatingRow from "@/components/LiveRatingRow";
 import { ClipLoader } from "react-spinners";
+import { teamLabel } from "@/lib/teamLabel";
 
 const eventLabel: Record<string, string> = {
   goal: "⚽ গোল",
@@ -30,7 +31,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     const { data: m } = await supabase
       .from("matches")
       .select(
-        "id, date, referee_name, score_a, score_b, status, team_a:team_a_id(id, department, formation), team_b:team_b_id(id, department, formation)"
+        "id, date, referee_name, score_a, score_b, status, team_a:team_a_id(id, name, department, formation), team_b:team_b_id(id, name, department, formation)"
       )
       .eq("id", params.id)
       .single<any>();
@@ -112,11 +113,11 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           </span>
         )}
         <div className="flex items-center justify-center gap-6 sm:gap-10">
-          <span className="font-display text-2xl sm:text-3xl text-chalk-100">{match.team_a?.department}</span>
+          <span className="font-display text-2xl sm:text-3xl text-chalk-100">{teamLabel(match.team_a)}</span>
           <span className="scoreboard-digit text-5xl sm:text-6xl font-bold text-floodlight-500">
             {match.score_a} – {match.score_b}
           </span>
-          <span className="font-display text-2xl sm:text-3xl text-chalk-100">{match.team_b?.department}</span>
+          <span className="font-display text-2xl sm:text-3xl text-chalk-100">{teamLabel(match.team_b)}</span>
         </div>
         <p className="text-chalk-300 text-sm mt-4">
           {new Date(match.date).toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" })}
@@ -127,16 +128,16 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
       {/* লাইনআপ */}
       <h2 className="font-display text-2xl tracking-wide text-chalk-100 mb-4">লাইনআপ</h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-10">
-        <Lineup squad={squadA} formation={match.team_a?.formation} teamName={match.team_a?.department} />
-        <Lineup squad={squadB} formation={match.team_b?.formation} teamName={match.team_b?.department} />
+        <Lineup squad={squadA} formation={match.team_a?.formation} teamName={teamLabel(match.team_a)} />
+        <Lineup squad={squadB} formation={match.team_b?.formation} teamName={teamLabel(match.team_b)} />
       </div>
 
       {/* দুই পাশে ইভেন্ট টাইমলাইন */}
       <h2 className="font-display text-2xl tracking-wide text-chalk-100 mb-4">ম্যাচ ইভেন্ট</h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-10">
         {[
-          { name: match.team_a?.department, events: eventsA },
-          { name: match.team_b?.department, events: eventsB },
+          { name: teamLabel(match.team_a), events: eventsA },
+          { name: teamLabel(match.team_b), events: eventsB },
         ].map((col, i) => (
           <div key={i} className="card">
             <p className="text-sm font-semibold text-chalk-100 px-4 pt-4 pb-2">{col.name}</p>

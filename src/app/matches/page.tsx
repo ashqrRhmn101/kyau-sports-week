@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import MatchCard from "@/components/MatchCard";
+import { teamLabel } from "@/lib/teamLabel";
 
 export const revalidate = 20;
 
@@ -8,7 +9,7 @@ export default async function MatchesPage() {
 
   const { data: matches } = await supabase
     .from("matches")
-    .select("id, date, score_a, score_b, status, team_a:team_a_id(department), team_b:team_b_id(department)")
+    .select("id, date, score_a, score_b, status, team_a:team_a_id(name, department), team_b:team_b_id(name, department)")
     .order("date", { ascending: false });
 
   const live = (matches ?? []).filter((m: any) => m.status === "live");
@@ -27,8 +28,8 @@ export default async function MatchesPage() {
               <MatchCard
                 key={m.id}
                 id={m.id}
-                teamAName={m.team_a?.department ?? "TBD"}
-                teamBName={m.team_b?.department ?? "TBD"}
+                teamAName={teamLabel(m.team_a)}
+                teamBName={teamLabel(m.team_b)}
                 scoreA={m.score_a}
                 scoreB={m.score_b}
                 status={m.status}
@@ -45,8 +46,8 @@ export default async function MatchesPage() {
             <MatchCard
               key={m.id}
               id={m.id}
-              teamAName={m.team_a?.department ?? "TBD"}
-              teamBName={m.team_b?.department ?? "TBD"}
+              teamAName={teamLabel(m.team_a)}
+              teamBName={teamLabel(m.team_b)}
               scoreA={m.score_a}
               scoreB={m.score_b}
               status={m.status}
